@@ -1,6 +1,7 @@
 import { TENANT_USER_ID, TokenClient } from '../classes/TokenClient.js'
 import { INDICATOR_ASSET_VERSION, INDICATOR_IMAGE_BASE64, INDICATOR_IMAGE_MIME } from './indicatorAsset.js'
 import { takePendingAckByUserMessage, takePendingAcks } from './pendingAcks.js'
+import { OPEN_API_BASE } from './platform.js'
 
 /**
  * The processing indicator: a minimal single-line note card (animated spinner + muted text) sent as a
@@ -10,8 +11,6 @@ import { takePendingAckByUserMessage, takePendingAcks } from './pendingAcks.js'
  * other replies resolve it to a muted "done" note (clearPendingIndicators), and the watcher's stale
  * sweep resolves abandoned cards to a "no response" note.
  */
-
-const LARK_BASE = 'https://open.larksuite.com/open-apis'
 
 export const INDICATOR_TEXT = 'Working on it — I\'ll reply here when done.'
 /** Final state when the real reply landed elsewhere (non-text reply, or a send not tied to the trigger message) */
@@ -32,7 +31,7 @@ interface LarkResult {
 }
 
 async function larkFetch(token: string, method: string, path: string, body?: unknown): Promise<LarkResult> {
-  const response = await fetch(`${LARK_BASE}${path}`, {
+  const response = await fetch(`${OPEN_API_BASE}${path}`, {
     method,
     headers: { 'Content-Type': 'application/json; charset=utf-8', Authorization: `Bearer ${token}` },
     body: body ? JSON.stringify(body) : undefined
@@ -79,7 +78,7 @@ async function ensureIndicatorImageKey(client: TokenClient): Promise<string | un
   const form = new FormData()
   form.append('image_type', 'message')
   form.append('image', new Blob([Buffer.from(INDICATOR_IMAGE_BASE64, 'base64')], { type: INDICATOR_IMAGE_MIME }), 'indicator.webp')
-  const response = await fetch(`${LARK_BASE}/im/v1/images`, {
+  const response = await fetch(`${OPEN_API_BASE}/im/v1/images`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${client.tenantToken}` },
     body: form
@@ -177,3 +176,4 @@ export async function clearPendingIndicators(chatId: string): Promise<void> {
     log.error('clear pending indicators error:', (error as Error).message)
   }
 }
+
