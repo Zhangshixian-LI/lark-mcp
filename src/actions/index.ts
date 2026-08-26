@@ -28,6 +28,7 @@ import { EventWatchStatus } from './Event/EventWatchStatus.js'
 import { ImChatList } from './Im/ImChatList.js'
 import { ImChatSearch } from './Im/ImChatSearch.js'
 import { ImMessageReply } from './Im/ImMessageReply.js'
+import { ImMessageList } from './Im/ImMessageList.js'
 import { ImMessageSend } from './Im/ImMessageSend.js'
 import { McpHealth } from './Mcp/McpHealth.js'
 import { McpRestart } from './Mcp/McpRestart.js'
@@ -70,6 +71,7 @@ export const actions = [
   EventWatchStatus,
   ImChatList,
   ImChatSearch,
+  ImMessageList,
   ImMessageReply,
   ImMessageSend,
   McpHealth,
@@ -83,3 +85,4 @@ export const actions = [
   WikiSpaceNodeList,
   WikiSpaceNodeMove
 ]
+
