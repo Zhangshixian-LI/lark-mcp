@@ -1,4 +1,5 @@
 import { LarkResponse } from '../types/api.js'
+import { OPEN_API_BASE } from './platform.js'
 
 export interface LarkTokenInfo {
   token_type: 'Bearer'
@@ -78,12 +79,12 @@ export interface ApiSchema {
 export type ApiUrl = keyof ApiSchema
 
 export const ApiUrlMap: Record<ApiUrl, string> = {
-  'AuthV3TenantAccessTokenInternal': 'https://open.larksuite.com/open-apis/auth/v3/tenant_access_token/internal',
-  'AuthenV1Authorize': 'https://open.larksuite.com/open-apis/authen/v1/authorize',
-  'AuthenV2OauthToken': 'https://open.larksuite.com/open-apis/authen/v2/oauth/token',
-  'AuthenV1UserInfo': 'https://open.larksuite.com/open-apis/authen/v1/user_info',
-  'BotV3Info': 'https://open.larksuite.com/open-apis/bot/v3/info',
-  'WikiV2NodesSearch': 'https://open.larksuite.com/open-apis/wiki/v2/nodes/search'
+  'AuthV3TenantAccessTokenInternal': `${OPEN_API_BASE}/auth/v3/tenant_access_token/internal`,
+  'AuthenV1Authorize': `${OPEN_API_BASE}/authen/v1/authorize`,
+  'AuthenV2OauthToken': `${OPEN_API_BASE}/authen/v2/oauth/token`,
+  'AuthenV1UserInfo': `${OPEN_API_BASE}/authen/v1/user_info`,
+  'BotV3Info': `${OPEN_API_BASE}/bot/v3/info`,
+  'WikiV2NodesSearch': `${OPEN_API_BASE}/wiki/v2/nodes/search`
 }
 
 export async function parseLarkResponse<T>(promise: Promise<LarkResponse<T>>) {
@@ -114,3 +115,4 @@ export function buildLarkUrl<K extends ApiUrl, S extends ApiSchema[K]>(key: K, p
   }
   return uri.toString()
 }
+
