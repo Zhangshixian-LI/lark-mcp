@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { AppType, Client, Domain, LoggerLevel, withTenantToken, withUserAccessToken } from '@larksuiteoapi/node-sdk'
+import { AppType, Client, LoggerLevel, withTenantToken, withUserAccessToken } from '@larksuiteoapi/node-sdk'
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'fs'
 import { dirname } from 'path'
 import { buildLarkUrl, fetchLark, parseLarkResponse } from '../lib/api.js'
 import { withFileLock } from '../lib/fileLock.js'
 import { CONFIG_PATH } from '../lib/paths.js'
+import { SDK_DOMAIN } from '../lib/platform.js'
 import { scopes } from '../lib/scopes.js'
 import { LarkResponse } from '../types/api.js'
 import { MessageSubscription, WatcherConfig } from '../types/events.js'
@@ -111,7 +112,7 @@ export class TokenClient {
     await this.assertValidAccessToken()
     if (!this.clientId) { throw new Error('Client ID is required, please re-authenticate') }
     if (!this.clientSecret) { throw new Error('Client Secret is required, please re-authenticate') }
-    const client = new Client({ appId: this.clientId, appSecret: this.clientSecret, appType: AppType.SelfBuild, domain: Domain.Lark, loggerLevel: LoggerLevel.error })
+    const client = new Client({ appId: this.clientId, appSecret: this.clientSecret, appType: AppType.SelfBuild, domain: SDK_DOMAIN, loggerLevel: LoggerLevel.error })
     return parseLarkResponse(fn(client, withUserAccessToken(this.accessToken)))
   }
 
@@ -119,13 +120,13 @@ export class TokenClient {
     if (!this.clientId) { throw new Error('Client ID is required, please run AuthenAuthorize first') }
     if (!this.clientSecret) { throw new Error('Client Secret is required, please run AuthenAuthorize first') }
     await this.assertValidTenantToken()
-    const client = new Client({ appId: this.clientId, appSecret: this.clientSecret, appType: AppType.SelfBuild, domain: Domain.Lark, loggerLevel: LoggerLevel.error })
+    const client = new Client({ appId: this.clientId, appSecret: this.clientSecret, appType: AppType.SelfBuild, domain: SDK_DOMAIN, loggerLevel: LoggerLevel.error })
     return parseLarkResponse(fn(client, withTenantToken(this.tenantToken!)))
   }
 
-  public get clientId() { return this.registry.clientId }
-  public get clientSecret() { return this.registry.clientSecret }
-  public get redirectUri() { return this.registry.redirectUri }
+  public get clientId() { return process.env.FEISHU_APP_ID ?? process.env.LARK_APP_ID ?? this.registry.clientId }
+  public get clientSecret() { return process.env.FEISHU_APP_SECRET ?? process.env.LARK_APP_SECRET ?? this.registry.clientSecret }
+  public get redirectUri() { return process.env.LARK_REDIRECT_URI ?? this.registry.redirectUri }
   public get tenantToken() { return this.registry.tenantToken }
   public get tenantTokenExpiresAt() { return this.registry.tenantTokenExpiresAt }
   public get accessToken() { return this.getEntry().accessToken }
@@ -158,8 +159,8 @@ export class TokenClient {
     const now = Date.now()
     if (this.tenantToken && this.tenantTokenExpiresAt && now < this.tenantTokenExpiresAt) { return }
     const response = await fetchLark('POST', 'AuthV3TenantAccessTokenInternal', undefined, {
-      app_id: this.registry.clientId,
-      app_secret: this.registry.clientSecret
+      app_id: this.clientId,
+      app_secret: this.clientSecret
     })
     this.mutate((registry) => {
       registry.tenantToken = response.tenant_access_token
@@ -225,3 +226,4 @@ export class TokenClient {
     return entry
   }
 }
+
