@@ -23,6 +23,10 @@ export default defineConfig([{
   banner: { js: '#!/usr/bin/env node' }
 }, {
   ...shared,
+  entry: ['src/http.ts'],
+  banner: { js: '#!/usr/bin/env node' }
+}, {
+  ...shared,
   entry: ['src/serve.ts'],
   banner: { js: '#!/usr/bin/env node' }
 }, {
@@ -30,3 +34,4 @@ export default defineConfig([{
   entry: ['src/listen.ts'],
   banner: { js: '#!/usr/bin/env node' }
 }])
+
