@@ -18,6 +18,7 @@
     "lark-cli": "./build/cli.mjs",
     "lark-listen": "./build/listen.mjs",
     "lark-mcp": "./build/mcp.mjs",
+    "lark-http": "./build/http.mjs",
     "lark-serve": "./build/serve.mjs"
   },
   "exports": {
@@ -37,6 +38,10 @@
       "import": "./build/mcp.mjs",
       "types": "./build/mcp.d.mts"
     },
+    "./http": {
+      "import": "./build/http.mjs",
+      "types": "./build/http.d.mts"
+    },
     "./serve": {
       "import": "./build/serve.mjs",
       "types": "./build/serve.d.mts"
@@ -51,6 +56,8 @@
     "lint": "eslint",
     "check": "pnpm lint && pnpm typecheck",
     "test": "tsx --test tests/*.test.ts",
+    "start": "node build/http.mjs",
+    "http": "tsx src/http.ts",
     "cli": "tsx src/cli.ts",
     "serve": "tsx src/serve.ts",
     "listen": "tsx src/listen.ts"
@@ -60,12 +67,15 @@
     "@silkweave/cli": "^3.1.0",
     "@silkweave/core": "^3.1.0",
     "@silkweave/mcp": "^3.1.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "xmlbuilder2": "^4.0.3",
     "zod": "4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.0.0",
     "eslint": "^10.6.0",
     "oauth-callback": "^1.2.5",
@@ -76,3 +86,4 @@
     "typescript-eslint": "^8.56.1"
   }
 }
+

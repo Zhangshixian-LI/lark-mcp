@@ -1,6 +1,8 @@
 # @silkweave/lark-mcp
 
-Lark/Feishu document parser and API client exposed as both an **MCP server** and a **CLI**. Built with [silkweave](https://www.npmjs.com/package/silkweave) and the official [@larksuiteoapi/node-sdk](https://www.npmjs.com/package/@larksuiteoapi/node-sdk).
+Feishu/Lark document parser and API client exposed as a local **stdio MCP server**, a cloud-ready **Streamable HTTP MCP server**, and a **CLI**. China Feishu (`open.feishu.cn`) is the default; set `LARK_DOMAIN=lark` for international Lark (`open.larksuite.com`). Built with [silkweave](https://www.npmjs.com/package/silkweave) and the official [@larksuiteoapi/node-sdk](https://www.npmjs.com/package/@larksuiteoapi/node-sdk).
+
+For a Chinese Railway + ChatGPT deployment guide, see [docs/RAILWAY_CHATGPT_FEISHU.md](docs/RAILWAY_CHATGPT_FEISHU.md).
 
 ## Features
 
@@ -9,6 +11,8 @@ Lark/Feishu document parser and API client exposed as both an **MCP server** and
 - Manage Wiki spaces, nodes, and search
 - Read and write Lark Base (Bitable) apps, tables, fields, and records
 - Send messages to users and group chats
+- Read paginated chat history with extracted plain text for summarization
+- Serve stateless Streamable HTTP MCP at `/mcp` and Railway health checks at `/health`
 - Subscribe to incoming messages (WebSocket long connection, no public URL needed)
 - List organization contacts
 - OAuth authentication flow for user-scoped API access
@@ -50,9 +54,9 @@ No installation required -- `npx` downloads and runs the package automatically.
 
 **Other MCP clients** -- use the command `npx -y @silkweave/lark-mcp mcp` with stdio transport.
 
-### 2. Create a Lark App
+### 2. Create a Feishu/Lark App
 
-1. Go to the [Lark Open Platform](https://open.larksuite.com/) and create a custom app
+1. Go to the [Feishu Open Platform](https://open.feishu.cn/) and create a custom app (or use [Lark Open Platform](https://open.larksuite.com/) with `LARK_DOMAIN=lark`)
 2. Note your **App ID** and **App Secret**
 3. Under **Security Settings**, add a Redirect URI: `http://localhost:3000/callback`
 4. Under **Permissions & Scopes**, add the scopes you need (see [Required Scopes](#required-scopes) below)
@@ -84,10 +88,19 @@ When configuring your Lark app, enable the OAuth scopes for the features you nee
 | Drive | `drive:drive`, `drive:export:readonly` |
 | Wiki | `wiki:wiki`, `wiki:node:read`, `wiki:node:retrieve`, `wiki:space:retrieve` |
 | Base (Bitable) | `bitable:app`, `bitable:app:write` |
-| Messaging | `im:chat`, `im:chat:read`, `im:chat:readonly`, `im:message` |
+| Messaging | `im:chat`, `im:chat:read`, `im:chat:readonly`, `im:message`, `im:message.group_msg` (required for group history) |
 | Other | `offline_access`, `admin:app.info:readonly`, `sheets:spreadsheet` |
 
 ## Usage
+
+### Streamable HTTP / Railway
+
+```bash
+pnpm build
+FEISHU_APP_ID=cli_xxx FEISHU_APP_SECRET=xxx pnpm start
+```
+
+The server listens on `HOST` (default `0.0.0.0`) and Railway's `PORT`, exposes `POST /mcp`, and returns readiness from `GET /health`. Set `MCP_ALLOWED_HOSTS` for additional comma-separated custom domains. Set `MCP_BEARER_TOKEN` to require a static bearer token on MCP requests; leave it unset only for controlled no-auth testing. App credentials can also use the legacy `LARK_APP_ID` / `LARK_APP_SECRET` names.
 
 ### As a Library
 
@@ -645,6 +658,24 @@ Search for chats by keyword.
 
 ---
 
+#### `ImMessageList`
+
+List historical messages in a chat, with an extracted plain-text `text` field suitable for summarization. The bot must be in the chat; group history requires `im:message.group_msg`.
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `chatId` | string | Yes | Chat ID to read |
+| `startTime` | string | No | Inclusive ISO 8601 time or Unix seconds |
+| `endTime` | string | No | Inclusive ISO 8601 time or Unix seconds |
+| `sortType` | `'ByCreateTimeAsc'` \| `'ByCreateTimeDesc'` | No | Message order (default: descending) |
+| `pageSize` | number | No | Results per page, 1-50 (default: 50) |
+| `pageToken` | string | No | Pagination token returned by the previous call |
+| `userId` | string | No | `'tenant'` (bot, default) or user token store key |
+
+**Returns:** `{ items, has_more, page_token }`. Continue with `pageToken` while `has_more` is true.
+
+---
+
 #### `ImMessageSend`
 
 Send a message to a user or group chat. Sends as the bot by default (`userId: 'tenant'`); pass a user token store key to send as that user.
@@ -843,3 +874,4 @@ pnpm publish --no-git-checks
 ## License
 
 MIT
+

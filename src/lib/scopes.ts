@@ -27,6 +27,7 @@ export const scopes = [
   'im:chat:read',
   'im:chat:readonly',
   'im:message',
+  'im:message.group_msg',
   'im:resource',
   'offline_access',
   'sheets:spreadsheet',
@@ -37,3 +38,4 @@ export const scopes = [
   'wiki:space:retrieve',
   'wiki:wiki'
 ]
+

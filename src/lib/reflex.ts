@@ -3,8 +3,8 @@ import { HistoryEntry, MessageEventRecord, ReflexConfig } from '../types/events.
 import { formatHistory, readHistory } from './history.js'
 import { IGNORED_TEXT, patchIndicatorCard, resolveIndicatorCard, sendIndicatorCard } from './indicator.js'
 import { addPendingAck } from './pendingAcks.js'
+import { OPEN_API_BASE } from './platform.js'
 
-const LARK_BASE = 'https://open.larksuite.com/open-apis'
 const ANTHROPIC_URL = 'https://api.anthropic.com/v1/messages'
 const DEFAULT_MODEL = 'claude-haiku-4-5'
 const DEFAULT_HISTORY_LIMIT = 15
@@ -51,7 +51,7 @@ interface AnthropicResponse {
 }
 
 async function larkFetch(token: string, method: string, path: string, body?: unknown): Promise<LarkResult> {
-  const response = await fetch(`${LARK_BASE}${path}`, {
+  const response = await fetch(`${OPEN_API_BASE}${path}`, {
     method,
     headers: { 'Content-Type': 'application/json; charset=utf-8', Authorization: `Bearer ${token}` },
     body: body ? JSON.stringify(body) : undefined
@@ -231,3 +231,4 @@ export async function runReflex(record: MessageEventRecord, config: ReflexConfig
   keepCardPending()
   return { dispatch: true, category: 'task', ackMessageId }
 }
+

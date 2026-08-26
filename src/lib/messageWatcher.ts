@@ -1,4 +1,4 @@
-import { Domain, EventDispatcher, LoggerLevel, WSClient } from '@larksuiteoapi/node-sdk'
+import { EventDispatcher, LoggerLevel, WSClient } from '@larksuiteoapi/node-sdk'
 import { spawn } from 'child_process'
 import { appendFileSync, existsSync, readFileSync, rmSync, writeFileSync } from 'fs'
 import { TENANT_USER_ID, TokenClient } from '../classes/TokenClient.js'
@@ -13,6 +13,7 @@ import { runReflex } from './reflex.js'
 import { applySubscriptionPatch, GatewayError, GatewayHost, WatcherGateway } from './watcherGateway.js'
 import { EVENTS_PATH, PID_PATH } from './paths.js'
 import { clearWatcherStatus, HEARTBEAT_MS, isProcessAlive, writeWatcherStatus } from './watcherStatus.js'
+import { SDK_DOMAIN } from './platform.js'
 
 export { EVENTS_PATH }
 const DISPATCH_HISTORY_LIMIT = 20
@@ -135,7 +136,7 @@ export class MessageWatcher implements GatewayHost {
     this.ws = new WSClient({
       appId: client.clientId,
       appSecret: client.clientSecret,
-      domain: Domain.Lark,
+      domain: SDK_DOMAIN,
       loggerLevel: LoggerLevel.error,
       logger: stderrLogger
     })
@@ -518,3 +519,4 @@ export class MessageWatcher implements GatewayHost {
 }
 
 export const messageWatcher = new MessageWatcher()
+
