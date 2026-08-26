@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } f
 import { basename, join } from 'path'
 import { MessageAttachment } from '../types/events.js'
 import { ATTACHMENTS_DIR } from './paths.js'
+import { OPEN_API_BASE } from './platform.js'
 
 /**
  * Attachment sideloading: message resources (images, files, media, audio — including images inside
@@ -12,7 +13,6 @@ import { ATTACHMENTS_DIR } from './paths.js'
  * The watcher's heartbeat sweeps message directories older than the retention window.
  */
 
-const LARK_BASE = 'https://open.larksuite.com/open-apis'
 /** Sideloaded copies older than this are removed by the watcher's sweep — attachments are working files, not an archive. */
 export const ATTACHMENT_RETENTION_MS = 7 * 24 * 60 * 60 * 1000
 /** The watcher heartbeat runs the sweep at most this often. */
@@ -164,7 +164,7 @@ export async function sideloadAttachments(token: string, messageId: string, refs
   const used = new Set<string>()
   for (const [index, ref] of refs.entries()) {
     try {
-      const response = await fetch(`${LARK_BASE}/im/v1/messages/${messageId}/resources/${ref.key}?type=${ref.type}`, {
+      const response = await fetch(`${OPEN_API_BASE}/im/v1/messages/${messageId}/resources/${ref.key}?type=${ref.type}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       const mimeType = (response.headers.get('content-type') ?? '').split(';')[0].trim()
@@ -211,3 +211,4 @@ export function sweepAttachments(maxAgeMs = ATTACHMENT_RETENTION_MS): number {
   }
   return removed
 }
+
